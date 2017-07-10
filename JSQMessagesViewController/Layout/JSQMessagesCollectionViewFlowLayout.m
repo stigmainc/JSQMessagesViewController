@@ -308,8 +308,17 @@ const CGFloat kJSQMessagesCollectionViewAvatarSizeDefault = 30.0f;
     [attributesInRect enumerateObjectsUsingBlock:^(JSQMessagesCollectionViewLayoutAttributes *attributesItem, NSUInteger idx, BOOL *stop) {
         if (attributesItem.representedElementCategory == UICollectionElementCategoryCell) {
             [self jsq_configureMessageCellLayoutAttributes:attributesItem];
-        }
-        else {
+        } else if (attributesItem.representedElementKind == UICollectionElementKindSectionFooter) {
+            // Place typing indicator footer directly below last cell in section
+            NSUInteger section = attributesItem.indexPath.section;
+            NSUInteger items = [self.collectionView numberOfItemsInSection:section];
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:items - 1 inSection:section];
+            UICollectionViewLayoutAttributes *lastCellAttributes = [self layoutAttributesForItemAtIndexPath:indexPath];
+
+            CGRect frame = attributesItem.frame;
+            frame.origin.y = CGRectGetMaxY(lastCellAttributes.frame);
+            attributesItem.frame = frame;
+        } else {
             attributesItem.zIndex = -1;
         }
     }];
@@ -344,12 +353,9 @@ const CGFloat kJSQMessagesCollectionViewAvatarSizeDefault = 30.0f;
         }];
     }
     
-    CGRect oldBounds = self.collectionView.bounds;
-    if (CGRectGetWidth(newBounds) != CGRectGetWidth(oldBounds)) {
-        return YES;
-    }
-    
-    return NO;
+
+    BOOL invalidate = !CGSizeEqualToSize(self.collectionView.bounds.size, newBounds.size);
+    return invalidate;
 }
 
 - (void)prepareForCollectionViewUpdates:(NSArray *)updateItems

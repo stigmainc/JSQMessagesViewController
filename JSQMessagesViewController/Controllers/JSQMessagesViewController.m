@@ -259,6 +259,12 @@ JSQMessagesKeyboardControllerDelegate>
     [self jsq_updateCollectionViewInsets];
 }
 
+- (void)setBottomContentAdditionalInset:(CGFloat)bottomContentAdditionalInset
+{
+    _bottomContentAdditionalInset = bottomContentAdditionalInset;
+    [self jsq_updateCollectionViewInsets];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
@@ -429,9 +435,11 @@ JSQMessagesKeyboardControllerDelegate>
     if ([self.collectionView numberOfSections] == 0) {
         return;
     }
-
-    NSIndexPath *lastCell = [NSIndexPath indexPathForItem:([self.collectionView numberOfItemsInSection:0] - 1) inSection:0];
-    [self scrollToIndexPath:lastCell animated:animated];
+//temp removed as we need to turn showTypingIndicator OFF only if the conversation has been scrolled up & turn it back on if we've scrolled back to the bottom
+//    if (self.showTypingIndicator == NO) { // If typing indicator is shown, do not scroll to bottom.
+        NSIndexPath *lastCell = [NSIndexPath indexPathForItem:([self.collectionView numberOfItemsInSection:0] - 1) inSection:0];
+        [self scrollToIndexPath:lastCell animated:animated];
+//    }
 }
 
 
@@ -468,6 +476,7 @@ JSQMessagesKeyboardControllerDelegate>
     CGFloat maxHeightForVisibleMessage = CGRectGetHeight(self.collectionView.bounds)
                                          - self.collectionView.contentInset.top
                                          - self.collectionView.contentInset.bottom
+                                         - self.topContentAdditionalInset
                                          - CGRectGetHeight(self.inputToolbar.bounds);
     UICollectionViewScrollPosition scrollPosition = (cellSize.height > maxHeightForVisibleMessage) ? UICollectionViewScrollPositionBottom : UICollectionViewScrollPositionTop;
 
@@ -1055,7 +1064,7 @@ JSQMessagesKeyboardControllerDelegate>
 - (void)jsq_updateCollectionViewInsets
 {
     [self jsq_setCollectionViewInsetsTopValue:self.topLayoutGuide.length + self.topContentAdditionalInset
-                                  bottomValue:CGRectGetMaxY(self.collectionView.frame) - CGRectGetMinY(self.inputToolbar.frame)];
+                                  bottomValue:CGRectGetMaxY(self.collectionView.frame) - CGRectGetMinY(self.inputToolbar.frame) + self.bottomContentAdditionalInset];
 }
 
 - (void)jsq_setCollectionViewInsetsTopValue:(CGFloat)top bottomValue:(CGFloat)bottom
