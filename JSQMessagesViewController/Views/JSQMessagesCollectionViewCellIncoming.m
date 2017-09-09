@@ -18,6 +18,20 @@
 
 #import "JSQMessagesCollectionViewCellIncoming.h"
 
+@interface JSQBottomAlignedLabel: UILabel
+@end
+
+@implementation JSQBottomAlignedLabel
+
+- (void)drawTextInRect:(CGRect)rect{
+    CGFloat height = [self sizeThatFits:rect.size].height;
+    rect.origin.y += rect.size.height - height + 2;
+    rect.size.height = height;
+    [super drawTextInRect:rect];
+}
+
+@end
+
 @implementation JSQMessagesCollectionViewCellIncoming
 
 #pragma mark - Overrides
